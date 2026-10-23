@@ -1,0 +1,743 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details | TaskFlow Admin</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #198754;
+            --primary-dark: #126c42;
+            --sidebar-width: 250px;
+            --background: #f5f7fb;
+            --text-dark: #243247;
+            --text-muted: #788599;
+            --border: #e9edf2;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text-dark);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        a { text-decoration: none; }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 26px 18px;
+            z-index: 1040;
+            transition: transform .3s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 10px;
+            margin-bottom: 40px;
+            color: var(--text-dark);
+            font-size: 23px;
+            font-weight: 750;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 22px;
+        }
+
+        .sidebar-label {
+            color: #9aa4b2;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+
+        .side-link {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 14px;
+            margin-bottom: 7px;
+            border-radius: 10px;
+            color: #68768a;
+            font-size: 14px;
+            font-weight: 550;
+            transition: .2s;
+        }
+
+        .side-link i { font-size: 18px; }
+
+        .side-link:hover,
+        .side-link.active {
+            background: #eaf6ef;
+            color: var(--primary);
+        }
+
+        .sidebar-bottom {
+            position: absolute;
+            bottom: 22px;
+            left: 18px;
+            right: 18px;
+        }
+
+        .admin-mini {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 13px 10px;
+            border-top: 1px solid #edf0f4;
+            margin-top: 20px;
+        }
+
+        .avatar {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #d9f0e2;
+            color: #167348;
+            font-weight: 750;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 14px 34px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-title {
+            font-weight: 750;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 330px;
+            width: 100%;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a96a7;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 40px;
+            background: #f7f9fc;
+            border: 1px solid #edf0f5;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .notification-bell {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            font-size: 20px;
+            padding: 8px;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 3px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-area {
+            padding: 32px 34px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        .welcome-panel {
+            padding: 27px 32px;
+            border-radius: 18px;
+            background: linear-gradient(115deg, #167648, #269b61);
+            color: #fff;
+            margin-bottom: 25px;
+        }
+
+        .welcome-panel h1 {
+            font-size: clamp(23px, 3vw, 31px);
+            font-weight: 750;
+            margin-bottom: 8px;
+        }
+
+        .welcome-panel p {
+            margin-bottom: 0;
+            color: rgba(255,255,255,.83);
+        }
+
+        .content-card {
+            background: #fff;
+            border: 1px solid #edf0f5;
+            border-radius: 15px;
+            padding: 23px;
+            margin-bottom: 22px;
+        }
+
+        .section-heading {
+            font-size: 18px;
+            font-weight: 750;
+            margin-bottom: 5px;
+        }
+
+        .muted { color: var(--text-muted); }
+
+        .task-title {
+            font-size: 22px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .task-description {
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+            line-height: 1.7;
+            color: #5e6c80;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 13px;
+            margin-top: 22px;
+        }
+
+        .meta-box {
+            padding: 15px;
+            border: 1px solid #edf0f5;
+            border-radius: 12px;
+            background: #fbfcfe;
+        }
+
+        .meta-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+        }
+
+        .meta-value {
+            font-size: 13px;
+            font-weight: 750;
+            overflow-wrap: anywhere;
+        }
+
+        .status-badge,
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .status-todo { background: #fff3d9; color: #986500; }
+        .status-in_progress { background: #e6f1ff; color: #2267ad; }
+        .status-completed { background: #e0f6e9; color: #198754; }
+
+        .priority-low { background: #e5f6eb; color: #198754; }
+        .priority-medium { background: #fff3dc; color: #a86e0a; }
+        .priority-high { background: #fde8eb; color: #c43d4b; }
+
+        .comment-item {
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #f9fafb;
+            border: 1px solid #edf0f5;
+            border-radius: 11px;
+        }
+
+        .comment-item:last-child { margin-bottom: 0; }
+
+        .comment-item p {
+            margin: 10px 0 0;
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+        }
+
+        .comment-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .comment-input {
+            width: 100%;
+            min-height: 110px;
+            padding: 13px;
+            border: 1px solid #d9e2eb;
+            border-radius: 10px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .comment-input:focus {
+            border-color: #82cba2;
+            box-shadow: 0 0 0 3px rgba(25,135,84,.08);
+        }
+
+        .add-comment-btn {
+            border: 0;
+            border-radius: 9px;
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 16px;
+            font-weight: 700;
+        }
+
+        .add-comment-btn:hover { background: var(--primary-dark); }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 15px;
+            color: var(--text-muted);
+        }
+
+        .footer-text {
+            color: #98a2b1;
+            text-align: center;
+            font-size: 12px;
+            padding: 20px 0 5px;
+        }
+
+        .menu-toggle {
+            display: none;
+            border: 0;
+            background: transparent;
+            font-size: 24px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1030;
+            background: rgba(15,25,40,.4);
+        }
+
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: inline-block; }
+            .topbar { padding: 14px 20px; }
+            .content-area { padding: 25px 20px; }
+            .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 575px) {
+            .topbar { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+            .topbar .search-box { order: 3; max-width: none; }
+            .content-area { padding: 20px 14px; }
+            .content-card { padding: 16px; }
+            .welcome-panel { padding: 23px 20px; }
+            .meta-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+            .meta-box { padding: 12px; }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar" id="sidebar">
+        <a href="{% url 'admin_home' %}" class="brand">
+            <span class="brand-icon"><i class="bi bi-check2-square"></i></span>
+            <span>TaskFlow</span>
+        </a>
+
+        <div class="sidebar-label">WORKSPACE</div>
+
+        <a href="{% url 'admin_home' %}" class="side-link">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+
+        <a href="{% url 'addtask' %}" class="side-link">
+            <i class="bi bi-plus-circle"></i> Create Task
+        </a>
+
+        <a href="{% url 'viewtask' %}" class="side-link active">
+            <i class="bi bi-list-task"></i> Manage Tasks
+        </a>
+
+        <a href="{% url 'view_users' %}" class="side-link">
+            <i class="bi bi-people"></i> View Users
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-label">ACCOUNT</div>
+
+            <a href="{% url 'log_out' %}" class="side-link">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+
+            <div class="admin-mini">
+                <div class="avatar">
+                    {{ profile.username|default:"A"|slice:":1"|upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <div class="fw-bold text-truncate" style="font-size:13px;">
+                        {{ profile.username|default:"Administrator" }}
+                    </div>
+                    <div class="text-secondary" style="font-size:11px;">
+                        Administrator
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h2 class="topbar-title">Task Details</h2>
+            </div>
+
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="search" id="commentSearch"
+                       placeholder="Search comments...">
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar">
+                    {{ profile.username|default:"A"|slice:":1"|upper }}
+                </div>
+
+                <a href="{% url 'admin_notification' %}"
+                   class="notification-bell" title="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    {% if unread_notifications_count > 0 %}
+                        <span class="notification-count">
+                            {{ unread_notifications_count }}
+                        </span>
+                    {% endif %}
+                </a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <section class="welcome-panel">
+                <div class="small mb-2">
+                    <i class="bi bi-clipboard-check me-1"></i>
+                    ADMIN WORKSPACE
+                </div>
+                <h1>Task Details</h1>
+                <p>Review the selected task and add feedback for the assigned team member.</p>
+            </section>
+
+            <section class="content-card">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div class="flex-grow-1">
+                        <div class="small muted mb-2">TASK #{{ task.id }}</div>
+                        <h2 class="task-title">{{ task.title }}</h2>
+                        <p class="task-description mb-0">
+                            {{ task.description|default:"No description provided." }}
+                        </p>
+                    </div>
+
+                    <a href="{% url 'viewtask' %}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back to Manage Tasks
+                    </a>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-person me-1"></i>Assigned To
+                        </div>
+                        <div class="meta-value">
+                            {% if task.assigned_to.registeration.name %}
+                                {{ task.assigned_to.registeration.name }}
+                            {% else %}
+                                {{ task.assigned_to.username }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-flag me-1"></i>Priority
+                        </div>
+                        <div class="meta-value">
+                            <span class="priority-badge priority-{{ task.priority }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-arrow-repeat me-1"></i>Status
+                        </div>
+                        <div class="meta-value">
+                            <span class="status-badge status-{{ task.status }}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-calendar-event me-1"></i>Due Date
+                        </div>
+                        <div class="meta-value">
+                            {% if task.due_date %}
+                                {{ task.due_date|date:"d M Y" }}
+                            {% else %}
+                                Not set
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-person-check me-1"></i>Created By
+                        </div>
+                        <div class="meta-value">
+                            {{ task.created_by.username|default:"Administrator" }}
+                        </div>
+                    </div>
+
+                    <div class="meta-box">
+                        <div class="meta-label">
+                            <i class="bi bi-calendar-plus me-1"></i>Created Date
+                        </div>
+                        <div class="meta-value">
+                            {{ task.created_date|date:"d M Y"|default:"—" }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-card">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h3 class="section-heading">Task Comments</h3>
+                        <p class="small muted mb-0">
+                            Read existing feedback or add a new comment.
+                        </p>
+                    </div>
+                    <span class="badge text-bg-success">
+                        {{ task.comments.count }} comments
+                    </span>
+                </div>
+
+                <div id="commentsList" class="mb-4">
+                    {% for comment in task.comments.all %}
+                        <div class="comment-item comment-search-item">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <strong>
+    {% if comment.user.registeration %}
+        {{ comment.user.registeration.name }}
+    {% else %}
+        {{ comment.user.username }}
+    {% endif %}
+</strong>
+                                <span class="comment-date">
+                                    {{ comment.created_at|date:"d M Y, h:i A" }}
+                                </span>
+                            </div>
+                            <p>{{ comment.comment|linebreaksbr }}</p>
+                        </div>
+                    {% empty %}
+                        <div class="empty-state" id="emptyComments">
+                            <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+                            <strong>No comments yet</strong>
+                            <div class="small mt-1">
+                                Add the first comment for this task below.
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <form id="adminCommentForm" data-task-id="{{ task.id }}">
+                    {% csrf_token %}
+
+                    <label for="adminComment" class="form-label fw-semibold">
+                        Add a comment
+                    </label>
+
+                    <textarea id="adminComment" name="comment"
+                              class="comment-input" rows="4"
+                              placeholder="Write feedback or instructions for this task..."
+                              required></textarea>
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                        <small class="muted">
+                            Your comment will be saved against this task.
+                        </small>
+                        <button type="submit" class="add-comment-btn"
+                                id="addCommentButton">
+                            <i class="bi bi-send me-1"></i> Add Comment
+                        </button>
+                    </div>
+
+                    <p id="commentMessage" class="small mt-2 mb-0"
+                       role="status"></p>
+                </form>
+            </section>
+
+            <footer class="footer-text">
+                TaskFlow Admin Dashboard &copy; {% now "Y" %}
+                · Manage work with clarity.
+            </footer>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Mobile sidebar
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+
+        menuToggle.addEventListener('click', function () {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        });
+
+        overlay.addEventListener('click', closeSidebar);
+
+        // Search existing comments
+        document.getElementById('commentSearch').addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+
+            document.querySelectorAll('.comment-search-item').forEach(function (item) {
+                item.style.display =
+                    item.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        // Submit comment using AJAX
+        $('#adminCommentForm').on('submit', function (event) {
+            event.preventDefault();
+
+            const form = $(this);
+            const taskId = form.data('task-id');
+            const commentText = $('#adminComment').val().trim();
+            const message = $('#commentMessage');
+            const button = $('#addCommentButton');
+
+            if (!commentText) {
+                message.removeClass('text-success')
+                    .addClass('text-danger')
+                    .text('Please enter a comment.');
+                return;
+            }
+
+            button.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm me-1"></span> Saving...');
+
+            message.text('');
+
+            $.ajax({
+                url: "{% url 'add_task_comment' %}",
+                type: "POST",
+                data: {
+                    task_id: taskId,
+                    comment: commentText,
+                    csrfmiddlewaretoken: form.find(
+                        'input[name="csrfmiddlewaretoken"]').val()
+                },
+
+                success: function (response) {
+                    if (response.success) {
+                        message.removeClass('text-danger')
+                            .addClass('text-success')
+                            .text('Comment added successfully.');
+                        location.reload();
+                    } else {
+                        message.removeClass('text-success')
+                            .addClass('text-danger')
+                            .text(response.message || 'Unable to add comment.');
+
+                        button.prop('disabled', false)
+                            .html('<i class="bi bi-send me-1"></i> Add Comment');
+                    }
+                },
+
+                error: function (xhr) {
+                    let errorMessage = 'Error while saving the comment.';
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+
+                    message.removeClass('text-success')
+                        .addClass('text-danger')
+                        .text(errorMessage);
+
+                    button.prop('disabled', false)
+                        .html('<i class="bi bi-send me-1"></i> Add Comment');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

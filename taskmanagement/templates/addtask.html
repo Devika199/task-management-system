@@ -1,150 +1,830 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task management</title>
+    <title>TaskFlow | Create Task</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
-       
-
-        body{
-            background:#f8f9fa;
+        :root {
+            --primary: #198754;
+            --primary-dark: #126c42;
+            --sidebar-width: 250px;
+            --background: #f5f7fb;
+            --text-dark: #243247;
+            --muted: #7b8798;
         }
 
-        .navbar{
-            background:white;
-            box-shadow:0 3px 10px rgba(0,0,0,.08);
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text-dark);
+            font-family: "Segoe UI", sans-serif;
         }
 
-      
-      
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: white;
+            border-right: 1px solid #e9edf3;
+            display: flex;
+            flex-direction: column;
+            z-index: 1050;
+            transition: transform .3s ease;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 24px 22px;
+            font-size: 22px;
+            font-weight: 750;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+        }
+
+        .sidebar-label {
+            margin: 26px 22px 12px;
+            color: #9aa4b2;
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            padding: 0 13px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 14px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            color: #68768a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #e8f5ed;
+            color: var(--primary);
+        }
+
+        .sidebar-nav a i { font-size: 18px; }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 18px;
+            border-top: 1px solid #edf0f4;
+        }
+
+        .profile-small {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 0;
+        }
+
+        .avatar {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #d9f0e2;
+            color: var(--primary-dark);
+            font-weight: 750;
+        }
+
+        .profile-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-role {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* Main layout */
+        .main-content {
+            min-height: 100vh;
+            margin-left: var(--sidebar-width);
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 17px 30px;
+            background: white;
+            border-bottom: 1px solid #edf0f4;
+            box-shadow: 0 2px 12px rgba(0,0,0,.025);
+        }
+
+        .topbar h5 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .topbar-subtitle {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .notification-bell {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 39px;
+            height: 39px;
+            border: 1px solid #e9edf3;
+            border-radius: 11px;
+            color: #68768a;
+            text-decoration: none;
+        }
+
+        .notification-bell:hover {
+            color: var(--primary);
+            background: #e8f5ed;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 18px;
+            padding: 2px 5px;
+            border-radius: 20px;
+            background: #dc3545;
+            color: white;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .menu-toggle {
+            display: none;
+            border: 0;
+            background: transparent;
+            font-size: 24px;
+            color: var(--text-dark);
+        }
+
+        .page-wrapper {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Welcome banner */
+        .welcome-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 27px 30px;
+            margin-bottom: 27px;
+            border-radius: 17px;
+            color: white;
+            background: linear-gradient(115deg, #198754, #32a66b);
+            box-shadow: 0 10px 25px rgba(25,135,84,.12);
+        }
+
+        .welcome-banner h2 {
+            margin-bottom: 8px;
+            font-size: clamp(22px, 3vw, 28px);
+            font-weight: 750;
+        }
+
+        .welcome-banner p {
+            margin: 0;
+            color: rgba(255,255,255,.85);
+            font-size: 13px;
+        }
+
+        .banner-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.17);
+            font-size: 30px;
+        }
+
+        .breadcrumb-text {
+            margin-bottom: 13px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .breadcrumb-text a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .page-title {
+            margin-bottom: 7px;
+            font-size: 25px;
+            font-weight: 750;
+        }
+
+        .page-subtitle {
+            margin-bottom: 24px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* Form card */
+        .task-card {
+            overflow: hidden;
+            background: white;
+            border: 1px solid #e9edf3;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(30,50,80,.035);
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 22px 27px;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .heading-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 45px;
+            height: 45px;
+            border-radius: 13px;
+            background: #e6f5ec;
+            color: var(--primary);
+            font-size: 21px;
+        }
+
+        .card-heading h5 {
+            margin-bottom: 4px;
+            font-size: 16px;
+            font-weight: 750;
+        }
+
+        .card-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .card-content { padding: 27px; }
+
+        .form-label {
+            margin-bottom: 9px;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .required { color: #dc3545; }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap > i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            z-index: 2;
+            transform: translateY(-50%);
+            color: #8a96a7;
+            pointer-events: none;
+        }
+
+        .input-wrap .form-control,
+        .input-wrap .form-select {
+            min-height: 45px;
+            padding-left: 40px;
+            border-color: #e0e6ed;
+            border-radius: 9px;
+            font-size: 13px;
+        }
+
+        .input-wrap .form-select { padding-right: 35px; }
+
+        textarea.form-control {
+            min-height: 125px;
+            resize: vertical;
+        }
+
+        textarea.input-icon { padding-top: 13px; }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #76bd95;
+            box-shadow: 0 0 0 .2rem rgba(25,135,84,.10);
+        }
+
+        .form-text {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .form-section-title {
+            margin: 7px 0 20px;
+            color: #566478;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .priority-note {
+            display: inline-block;
+            padding: 6px 9px;
+            margin-top: 8px;
+            border-radius: 6px;
+            background: #f1f4f8;
+            color: #657286;
+            font-size: 11px;
+        }
+
+        .form-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding-top: 24px;
+            margin-top: 28px;
+            border-top: 1px solid #edf0f4;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            min-height: 44px;
+            padding: 0 22px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .btn-success {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-success:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .footer-text {
+            padding: 24px 0 8px;
+            color: #98a2b1;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .sidebar-overlay {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 1040;
+                background: rgba(20,30,40,.35);
+            }
+
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: inline-block; }
+            .topbar { padding: 15px 20px; }
+            .page-wrapper { padding: 22px 20px; }
+        }
+
+        @media (max-width: 576px) {
+            .page-wrapper { padding: 18px 12px; }
+            .welcome-banner { padding: 22px 18px; }
+            .banner-icon { width: 48px; height: 48px; font-size: 23px; }
+            .card-heading { padding: 18px; }
+            .card-content { padding: 19px; }
+            .form-footer { flex-direction: column-reverse; align-items: stretch; }
+            .form-footer .btn { width: 100%; }
+            .topbar { padding: 13px; }
+            .topbar-right { gap: 8px; }
+        }
     </style>
-
 </head>
+
 <body>
 
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'admin_home' %}">
+        <span class="brand-icon">
+            <i class="bi bi-check2-square"></i>
+        </span>
+        TaskFlow
+    </a>
 
-<nav class="navbar navbar-expand-lg sticky-top">
-<div class="container">
+    <div class="sidebar-label">Workspace</div>
 
-<a class="navbar-brand" href="#">Task Management</a>
+    <nav class="sidebar-nav">
+        <a href="{% url 'admin_home' %}">
+            <i class="bi bi-grid"></i> Dashboard
+        </a>
 
-<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#menu">
-<span class="navbar-toggler-icon"></span>
-</button>
+        <a href="{% url 'addtask' %}" class="active">
+            <i class="bi bi-plus-square"></i> Create Task
+        </a>
 
-<div class="collapse navbar-collapse" id="menu">
+        <a href="{% url 'viewtask' %}">
+            <i class="bi bi-list-task"></i> Manage Tasks
+        </a>
 
-<ul class="navbar-nav ms-auto">
+        <a href="{% url 'view_users' %}" class="">
+            <i class="bi bi-people"></i>
+            View Users
+        </a>
 
+    </nav>
 
-
-
-<li class="nav-item ms-2">
-<a href="{% url 'addtask' %}" class="btn btn-success">Add Task</a>
-<a href="{% url 'viewtask' %}" class="btn btn-success">View Task</a>
-<a href="{% url 'log_out' %}" class="btn btn-success">Logout</a>
-
-</li>
-
-
-</ul>
-
-</div>
-
-</div>
-</nav>
-<div class="card shadow-sm mb-4 mt-4" id="">
-    <div class="card-header  text-black" >
-        <i class=" me-2" style="background-color: aquamarine;"></i> Add Task
-    </div>
-
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <label class="form-label"> Title</label>
-                <input type="text" class="form-control" id="name">
+    <div class="sidebar-bottom">
+        <div class="profile-small">
+            <div class="avatar">
+                {{ request.user.username|first|upper }}
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Description</label>
-                <input type="textarea" class="form-control" id="add">
+            <div class="overflow-hidden">
+                <div class="profile-name">
+                    {{ request.user.username }}
+                </div>
+                <div class="profile-role">Administrator</div>
             </div>
-             <div class="col-md-6">
-                <label class="form-label">Status</label>
-              <select class="form-select" id="status">
-        <option value="" selected disabled>Select Status</option>
-        <option value="Todo">Todo</option>
-        <option value="Progress">Progress</option>
-        <option value="Completed">Completed</option>
-    </select>
-
-                
-                
-            </div>
-             <div class="col-md-6">
-                <label class="form-label">priority</label>
-                <select class="form-select" id="priority">
-                                <option value="" selected disabled>Select priority</option>
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-</select>
-               
-            </div>
-           
-            <div class="col-md-6">
-                <label class="form-label">Due Date</label>
-                                <input type="date" class="form-control" id="date" >
-
-               
-            </div>
-            <div class="col-md-12 text-center mt-3">
-                              <button type="button" style="background-color: black;"
-                                 class="btn btn-lg px-5 text-light" onclick="savetask()">
-Submit                                </button>
-                            </div>
         </div>
+
+        <a href="{% url 'log_out' %}"
+           class="btn btn-outline-secondary btn-sm w-100 mt-3">
+            <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </a>
     </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Main content -->
+<div class="main-content">
+
+    <header class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="menu-toggle" id="menuToggle"
+                    type="button" aria-label="Toggle sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div>
+                <h5>Create Task</h5>
+                <div class="topbar-subtitle">
+                    Create and assign work to your team
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 ms-3">
+            <div class="avatar">
+                {{ profile.username|default:"A"|slice:":1"|upper }}
+            </div>
+            <div class="notification-wrapper">
+    <a href="{% url 'admin_notification' %}" class="notification-bell" title="Notifications">
+        <i class="bi bi-bell-fill"></i>
+
+        {% if unread_notifications_count > 0 %}
+            <span class="notification-count">
+                {{ unread_notifications_count }}
+            </span>
+        {% endif %}
+    </a>
 </div>
-</body>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+
+        <section class="welcome-banner">
+            <div>
+                <h2>Let's get things done!</h2>
+                <p>Create a task, assign a team member, and set a clear deadline.</p>
+            </div>
+            <div class="banner-icon">
+                <i class="bi bi-clipboard2-check"></i>
+            </div>
+        </section>
+
+        <div class="breadcrumb-text">
+            <a href="{% url 'admin_home' %}">Dashboard</a>
+            <i class="bi bi-chevron-right mx-2"></i>
+            Create Task
+        </div>
+
+        <h1 class="page-title">Create a new task</h1>
+        <p class="page-subtitle">
+            Add task details, set a deadline, and assign responsibility to a team member.
+        </p>
+
+        <div id="alertBox" class="alert d-none" role="alert"></div>
+
+        <section class="task-card">
+
+            <div class="card-heading">
+                <div class="heading-icon">
+                    <i class="bi bi-clipboard2-plus"></i>
+                </div>
+                <div>
+                    <h5>Task Information</h5>
+                    <p>Fields marked with <span class="required">*</span> are required.</p>
+                </div>
+            </div>
+
+            <div class="card-content">
+
+                <form id="taskForm">
+                    {% csrf_token %}
+
+                    <div class="form-section-title">Basic details</div>
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label for="name" class="form-label">
+                                Task Title <span class="required">*</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-card-heading"></i>
+                                <input type="text" class="form-control"
+                                       id="name" name="name"
+                                       placeholder="e.g. Develop the login page"
+                                       maxlength="200" required>
+                            </div>
+                            <div class="form-text">
+                                Use a short, clear title describing the task.
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="add" class="form-label">Description</label>
+                            <div class="input-wrap">
+                                <textarea class="form-control input-icon"
+                                          id="add" name="des"
+                                          placeholder="Describe the task, requirements and expected outcome..."
+                                          rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
+                        Assignment and deadline
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="assigned_to" class="form-label">
+                                Assigned To <span class="required">*</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-person"></i>
+                                <select class="form-select" id="assigned_to"
+                                        name="assigned_to" required>
+                                    <option value="" selected disabled>
+                                        Select a team member
+                                    </option>
+                                    {% for member in members %}
+                                        <option value="{{ member.user.id }}">
+                                            {{ member.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-text">
+                                Choose the user responsible for completing this task.
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="date" class="form-label">
+                                Due Date <span class="required">*</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-calendar-event"></i>
+                                <input type="date" class="form-control"
+                                       id="date" name="enddate" required>
+                            </div>
+                            <div class="form-text">
+                                Set the expected completion date.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
+                        Status and priority
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="priority" class="form-label">
+                                Priority <span class="required">*</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-flag"></i>
+                                <select class="form-select" id="priority"
+                                        name="priority" required>
+                                    <option value="" selected disabled>
+                                        Select priority
+                                    </option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div id="priorityNote" class="priority-note">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Choose the importance of this task.
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="status" class="form-label">
+                                Status <span class="required">*</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <select class="form-select" id="status"
+                                        name="status" required>
+                                    <option value="" selected disabled>
+                                        Select status
+                                    </option>
+                                    <option value="todo">To do</option>
+                                    <option value="in_progress">In progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-text">
+                                New tasks usually begin with To do.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <a href="{% url 'viewtask' %}"
+                           class="btn btn-outline-secondary ">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+
+                        <button type="submit" id="submitBtn"
+                                class="btn btn-success btn-submit">
+                            <i class="bi bi-check2-circle me-2"></i>
+                            Create Task
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <footer class="footer-text">
+            TaskFlow &copy; {% now "Y" %} · Plan better. Work smarter.
+        </footer>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-      
-function savetask(){
+    // Mobile sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-           var name= $('#name').val();
-           var des= $('#add').val();  
-           var status= $('#status').val();     
-           var priority= $('#priority').val();  
-          
-            var enddate=$('#date').val()     
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'task_save' %}",
-                data: {
-               'name': name,
-                    'des': des,
-                    'status': status,
-                    'priority':priority,
-                    'enddate':enddate,
-                   
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                
-                success: function(r) {
-                      if (r.success){
-                        alert(r.message)
-                        location.reload()
-                    
-                      }
+    $('#menuToggle, #sidebarOverlay').on('click', function () {
+        sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('show');
+    });
+
+    // Set minimum due date to today
+    const dateInput = document.getElementById('date');
+    const today = new Date();
+    const localToday = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+    ).toISOString().slice(0, 10);
+
+    dateInput.min = localToday;
+
+    // Priority helper text
+    $('#priority').on('change', function () {
+        const notes = {
+            low: 'Low: A task that can be handled when time permits.',
+            medium: 'Medium: A task with normal importance.',
+            high: 'High: A task that needs prompt attention.'
+        };
+
+        $('#priorityNote').text(
+            notes[this.value] || 'Choose the importance of this task.'
+        );
+    });
+
+    // Submit task using AJAX
+    $('#taskForm').on('submit', function (event) {
+        event.preventDefault();
+
+        const submitBtn = $('#submitBtn');
+        submitBtn.prop('disabled', true)
+                 .html('<span class="spinner-border spinner-border-sm me-2"></span>Creating...');
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'task_save' %}",
+            data: {
+                name: $('#name').val(),
+                des: $('#add').val().trim(),
+                status: $('#status').val(),
+                priority: $('#priority').val(),
+                enddate: $('#date').val(),
+                assigned_to: $('#assigned_to').val(),
+                csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+            },
+
+            success: function (response) {
+                if (response.success) {
+                    alert('Task created successfully.');
+                    window.location.reload();
+                } else {
+                    alert(response.message || 'Unable to create task.');
+                    submitBtn.prop('disabled', false)
+                             .html('<i class="bi bi-check2-circle me-2"></i>Create Task');
                 }
-            });
-          }
+            },
 
+            error: function (xhr) {
+                alert('An error occurred while creating the task.');
+                submitBtn.prop('disabled', false)
+                         .html('<i class="bi bi-check2-circle me-2"></i>Create Task');
+                console.error(xhr.responseText);
+            }
+        });
+    });
 </script>
+
+</body>
 </html>
